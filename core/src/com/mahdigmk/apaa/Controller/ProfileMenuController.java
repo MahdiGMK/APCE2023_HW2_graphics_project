@@ -61,7 +61,7 @@ public class ProfileMenuController {
 
     public static ControllerResponse changePfp(User user, File file) {
         if (file == null || !file.exists()) return new ControllerResponse(1, "Invalid file path");
-        File dest = new File("Data/Users/" + user.getUsername() + "/pfp.img");
+        File dest = new File("Data/Users/" + user.getUsername() + "/pfp.png");
         dest.delete();
         try {
             Files.copy(file.toPath(), dest.toPath());
