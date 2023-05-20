@@ -5,12 +5,16 @@ import com.mahdigmk.apaa.Model.User;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.Random;
 
 public class ProfileMenuController {
     public static Random random = new Random();
 
     public static ControllerResponse changeUsername(User user, String newUsername) {
+        if (User.getUser(newUsername) != null)
+            return new ControllerResponse(1, "new Username already exists");
         File src = new File("Data/Users/" + user.getUsername());
         File dst = new File("Data/Users/" + newUsername);
         try {
@@ -31,15 +35,23 @@ public class ProfileMenuController {
 
     public static ControllerResponse removeAccount(User user) {
         File file = new File("Data/Users/" + user.getUsername());
-        file.delete();
+        try {
+            Files.walk(file.toPath())
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         return ControllerResponse.SUCCESS;
     }
 
-    public static ControllerResponse assingPfp(User user) {
-        return assignPfp(user, random.nextInt(LoginMenuController.DEFAULT_PFP_COUNT));
+    public static ControllerResponse changePfp(User user) {
+        return changePfp(user, random.nextInt(LoginMenuController.DEFAULT_PFP_COUNT));
     }
 
-    public static ControllerResponse assignPfp(User user, int pfp) {
+    public static ControllerResponse changePfp(User user, int pfp) {
         if (pfp >= LoginMenuController.DEFAULT_PFP_COUNT || pfp < 0)
             return new ControllerResponse(1, "Invalid PFP id");
         user.setPfp(pfp);
@@ -47,9 +59,10 @@ public class ProfileMenuController {
         return ControllerResponse.SUCCESS;
     }
 
-    public static ControllerResponse assignPfp(User user, File file) {
+    public static ControllerResponse changePfp(User user, File file) {
         if (file == null || !file.exists()) return new ControllerResponse(1, "Invalid file path");
         File dest = new File("Data/Users/" + user.getUsername() + "/pfp.img");
+        dest.delete();
         try {
             Files.copy(file.toPath(), dest.toPath());
         } catch (IOException e) {

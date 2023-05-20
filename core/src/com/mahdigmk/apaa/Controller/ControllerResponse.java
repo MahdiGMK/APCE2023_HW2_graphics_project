@@ -19,6 +19,10 @@ public class ControllerResponse {
         this.output = new HashMap<>(output);
     }
 
+    public int getErrorCode() {
+        return errorCode;
+    }
+
     public String getResponseMessage() {
         if (output.get("response message") instanceof String message) return message;
         return null;
@@ -26,5 +30,10 @@ public class ControllerResponse {
 
     public Object getOutput(String propertyName) {
         return output.get(propertyName);
+    }
+
+    @Override
+    public String toString() {
+        return getResponseMessage();
     }
 }
