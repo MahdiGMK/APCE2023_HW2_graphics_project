@@ -3,6 +3,7 @@ package com.mahdigmk.apaa.Controller;
 import com.mahdigmk.apaa.Model.User;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Random;
 
@@ -38,7 +39,14 @@ public class ProfileMenuController {
 
     public static ControllerResponse assignPfp(User user, File file) {
         if (file == null || !file.exists()) return new ControllerResponse(1, "Invalid file path");
-        
+        File dest = new File("Data/Users/" + user.getUsername() + "/pfp.img");
+        try {
+            Files.copy(file.toPath(), dest.toPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        user.setPfp(-1);
+        user.save();
         return ControllerResponse.SUCCESS;
     }
 }
