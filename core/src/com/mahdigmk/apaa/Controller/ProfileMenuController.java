@@ -11,17 +11,27 @@ public class ProfileMenuController {
     public static Random random = new Random();
 
     public static ControllerResponse changeUsername(User user, String newUsername) {
-
+        File src = new File("Data/Users/" + user.getUsername());
+        File dst = new File("Data/Users/" + newUsername);
+        try {
+            Files.move(src.toPath(), dst.toPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        user.setUsername(newUsername);
+        user.save();
         return ControllerResponse.SUCCESS;
     }
 
     public static ControllerResponse changePassword(User user, String newPassword) {
-
+        user.setPassword(newPassword);
+        user.save();
         return ControllerResponse.SUCCESS;
     }
 
     public static ControllerResponse removeAccount(User user) {
-
+        File file = new File("Data/Users/" + user.getUsername());
+        file.delete();
         return ControllerResponse.SUCCESS;
     }
 

@@ -11,7 +11,8 @@ public class LoginMenuController {
     public static ControllerResponse register(String username, String password) {
         User user = User.getUser(username);
         if (user != null) return new ControllerResponse(1, "Username already exists");
-        user = User.createUser(username, password, random.nextInt(DEFAULT_PFP_COUNT));
+        user = new User(username, password, random.nextInt(DEFAULT_PFP_COUNT));
+        user.save();
         return ControllerResponse.SUCCESS;
     }
 

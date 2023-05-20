@@ -17,12 +17,6 @@ public class User {
         this.pfp = pfp;
     }
 
-    public static User createUser(String username, String password, int pfp) {
-        User user = new User(username, password, pfp);
-        user.save();
-        return user;
-    }
-
     public static User getUser(String username) {
         File file = new File("Data/Users/" + username + "/data.json");
         if (!file.exists())
@@ -39,8 +33,6 @@ public class User {
     }
 
     public static void removeUser(String username) {
-        File file = new File("Data/Users/" + username);
-        file.delete();
     }
 
     public void save() {
