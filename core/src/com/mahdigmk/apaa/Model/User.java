@@ -38,6 +38,11 @@ public class User {
         }
     }
 
+    public static void removeUser(String username) {
+        File file = new File("Data/Users/" + username);
+        file.delete();
+    }
+
     public void save() {
         File file = new File("Data/Users/" + username + "/data.json");
 
