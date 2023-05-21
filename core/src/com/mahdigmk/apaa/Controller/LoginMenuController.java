@@ -1,5 +1,6 @@
 package com.mahdigmk.apaa.Controller;
 
+import com.mahdigmk.apaa.Model.Settings;
 import com.mahdigmk.apaa.Model.User;
 
 import java.util.Random;
@@ -12,7 +13,9 @@ public class LoginMenuController {
         User user = User.getUser(username);
         if (user != null) return new ControllerResponse(1, "Username already exists");
         user = new User(username, password, random.nextInt(DEFAULT_PFP_COUNT));
+        Settings userSettings = new Settings();
         user.save();
+        userSettings.save(user);
         return ControllerResponse.SUCCESS;
     }
 

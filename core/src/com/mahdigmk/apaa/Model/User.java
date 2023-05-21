@@ -10,11 +10,13 @@ import java.io.IOException;
 public class User {
     private String username, password;
     private int pfp;
+    private int score;
 
     public User(String username, String password, int pfp) {
         this.username = username;
         this.password = password;
         this.pfp = pfp;
+        score = 0;
     }
 
     public static User getUser(String username) {
@@ -30,9 +32,6 @@ public class User {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void removeUser(String username) {
     }
 
     public void save() {
@@ -73,4 +72,11 @@ public class User {
         this.password = password;
     }
 
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
 }
