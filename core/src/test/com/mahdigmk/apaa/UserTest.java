@@ -1,4 +1,4 @@
-package com.mahdigmk.apaa.Tests;
+package com.mahdigmk.apaa;
 
 import com.badlogic.gdx.Gdx;
 import com.mahdigmk.apaa.Controller.ControllerResponse;
