@@ -29,7 +29,6 @@ public class AAGame extends Game {
         batch = new SpriteBatch();
         font = new BitmapFont();
         setScreen(new LoginMenu(this));
-        setScreen(new LoginMenu(this));
     }
 
     @Override

@@ -38,6 +38,7 @@ public class LoginMenu extends Menu {
         loginButton = new TextButton("login", skin);
         guestButton = new TextButton("login as guest", skin);
 
+        rememberLogin.setChecked(true);
         registerButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -76,12 +77,23 @@ public class LoginMenu extends Menu {
         uiStage.addActor(table);
     }
 
+    @Override
+    public void show() {
+        super.show();
+        User user = LoginMenuController.getRememberUser();
+        if (user != null)
+            setScreen(new MainMenu(game, user));
+    }
+
     private void loginGuest() {
         response = LoginMenuController.loginGuest();
         errorLabel.setText(response.getResponseMessage());
         if (response.getErrorCode() != 0) return;
 
-        setScreen(new MainMenu(game, User.getUser("_guest_")));
+        User user = User.getUser("_guest_");
+        if (rememberLogin.isChecked())
+            LoginMenuController.rememberUser(user);
+        setScreen(new MainMenu(game, user));
     }
 
     private void login() {
@@ -89,7 +101,10 @@ public class LoginMenu extends Menu {
         errorLabel.setText(response.getResponseMessage());
         if (response.getErrorCode() != 0) return;
 
-        setScreen(new MainMenu(game, User.getUser(username.getText())));
+        User user = User.getUser(username.getText());
+        if (rememberLogin.isChecked())
+            LoginMenuController.rememberUser(user);
+        setScreen(new MainMenu(game, user));
     }
 
     private void register() {
@@ -97,7 +112,10 @@ public class LoginMenu extends Menu {
         errorLabel.setText(response.getResponseMessage());
         if (response.getErrorCode() != 0) return;
 
-        setScreen(new ProfileMenu(game, User.getUser(username.getText())));
+        User user = User.getUser(username.getText());
+        if (rememberLogin.isChecked())
+            LoginMenuController.rememberUser(user);
+        setScreen(new ProfileMenu(game, user));
     }
 
 
