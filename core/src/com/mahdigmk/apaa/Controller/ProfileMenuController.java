@@ -56,14 +56,16 @@ public class ProfileMenuController {
     }
 
     public static ControllerResponse changePfp(User user) {
-        return changePfp(user, random.nextInt(LoginMenuController.DEFAULT_PFP_COUNT));
+        return changePfp(user, random.nextInt(AAGame.defaultPfp.length));
     }
 
     public static ControllerResponse changePfp(User user, int pfp) {
-        if (pfp >= LoginMenuController.DEFAULT_PFP_COUNT || pfp < 0)
+        if (pfp >= AAGame.defaultPfp.length || pfp < 0)
             return new ControllerResponse(1, "Invalid PFP id");
 
         unloadPfpTexture(user);
+        File dest = new File("Data/Users/" + user.getUsername() + "/pfp.png");
+        dest.delete();
 
         user.setPfp(pfp);
         user.save();
@@ -73,11 +75,11 @@ public class ProfileMenuController {
 
     public static ControllerResponse changePfp(User user, File file) {
         if (file == null || !file.exists()) return new ControllerResponse(1, "Invalid file path");
-        File dest = new File("Data/Users/" + user.getUsername() + "/pfp.png");
 
         unloadPfpTexture(user);
-
+        File dest = new File("Data/Users/" + user.getUsername() + "/pfp.png");
         dest.delete();
+
         try {
             Files.copy(file.toPath(), dest.toPath());
         } catch (IOException e) {

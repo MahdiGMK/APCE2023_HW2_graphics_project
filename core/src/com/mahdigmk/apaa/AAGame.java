@@ -5,6 +5,7 @@ import com.badlogic.gdx.Game;
 
 import static com.badlogic.gdx.Gdx.*;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.graphics.Texture;
@@ -21,11 +22,16 @@ import com.mahdigmk.apaa.Model.Settings;
 import com.mahdigmk.apaa.Model.User;
 import com.mahdigmk.apaa.View.LoginMenu;
 import com.mahdigmk.apaa.View.ProfileMenu;
+import games.spooky.gdx.nativefilechooser.NativeFileChooser;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
 
 import java.io.File;
+import java.io.FilenameFilter;
 
 
 public class AAGame extends Game {
+    public static NativeFileChooser fileChooser;
+    public static NativeFileChooserConfiguration fileChooserConfiguration;
     public static Texture[] defaultPfp;
     public AssetManager assetManager = new AssetManager();
     private Skin skin;
@@ -47,9 +53,11 @@ public class AAGame extends Game {
     public void create() {
         manageAssets();
 
+        fileChooserConfiguration.directory = Gdx.files.absolute(System.getProperty("user.home"));
+
         skin = new Skin(files.internal("neon/skin/neon-ui.json"));
         user = User.getUser("user");
-        setScreen(new ProfileMenu(this));
+        setScreen(new LoginMenu(this));
     }
 
     private void manageAssets() {
@@ -61,6 +69,7 @@ public class AAGame extends Game {
         };
 
         assetManager.load("icons/change.png", Texture.class);
+        assetManager.load("icons/accept_tick.png", Texture.class);
 
         assetManager.finishLoading();
     }

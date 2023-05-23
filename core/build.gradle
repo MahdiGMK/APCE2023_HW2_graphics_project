@@ -1,11 +1,11 @@
 sourceCompatibility = 16
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-sourceSets.main.java.srcDirs = [ "src/" ]
+sourceSets.main.java.srcDirs = ["src/"]
 
 eclipse.project.name = appName + "-core"
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    implementation 'org.junit.jupiter:junit-jupiter:5.9.2'
 }

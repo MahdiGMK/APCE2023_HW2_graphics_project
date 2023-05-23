@@ -1,5 +1,6 @@
 package com.mahdigmk.apaa.Controller;
 
+import com.mahdigmk.apaa.AAGame;
 import com.mahdigmk.apaa.Model.Settings;
 import com.mahdigmk.apaa.Model.User;
 import jdk.jshell.execution.Util;
@@ -8,7 +9,6 @@ import java.io.*;
 import java.util.Random;
 
 public class LoginMenuController {
-    public static final int DEFAULT_PFP_COUNT = 4;
     public static Random random = new Random();
 
     public static ControllerResponse register(String username, String password) {
@@ -17,7 +17,7 @@ public class LoginMenuController {
             return usernameValidate;
         User user = User.getUser(username);
         if (user != null) return new ControllerResponse(2, "Username already exists");
-        user = new User(username, password, random.nextInt(DEFAULT_PFP_COUNT));
+        user = new User(username, password, random.nextInt(AAGame.defaultPfp.length));
         Settings userSettings = new Settings();
         user.save();
         userSettings.save(user);
