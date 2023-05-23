@@ -19,6 +19,14 @@ public abstract class Menu implements Screen {
         uiStage.setViewport(new FillViewport(graphics.getWidth(), graphics.getHeight()));
     }
 
+    protected Menu getScreen() {
+        return (Menu) game.getScreen();
+    }
+
+    protected void setScreen(Menu menu) {
+        game.setScreen(menu);
+    }
+
     @Override
     public void show() {
     }

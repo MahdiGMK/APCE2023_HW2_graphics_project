@@ -27,8 +27,14 @@ class UserTest {
 
         response = LoginMenuController.register("testUser", "testPassword");
         assertEquals(0, response.getErrorCode());
-        response = LoginMenuController.register("testUser", "testPassword");
+        response = LoginMenuController.register(" ", "testPassword");
         assertEquals(1, response.getErrorCode());
+        response = LoginMenuController.register("sal", "testPassword");
+        assertEquals(1, response.getErrorCode());
+        response = LoginMenuController.register("_guest_", "testPassword");
+        assertEquals(1, response.getErrorCode());
+        response = LoginMenuController.register("testUser", "testPassword");
+        assertEquals(2, response.getErrorCode());
     }
 
     @Test
@@ -94,5 +100,14 @@ class UserTest {
         response = ProfileMenuController.changePfp(user, new File("Data/testPfp.png"));
         assertEquals(0, response.getErrorCode());
         assertEquals(-1, user.getPfp());
+    }
+
+    @Test
+    @Order(3)
+    void remember() {
+        LoginMenuController.rememberUser(User.getUser("testUser"));
+        assertEquals("testUser", LoginMenuController.getRememberUser().getUsername());
+        LoginMenuController.rememberUser(null);
+        assertNull(LoginMenuController.getRememberUser());
     }
 }

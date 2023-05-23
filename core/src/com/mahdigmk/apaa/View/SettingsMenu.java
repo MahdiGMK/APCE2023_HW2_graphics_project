@@ -1,11 +1,13 @@
 package com.mahdigmk.apaa.View;
 
 import com.mahdigmk.apaa.AAGame;
-
-import static com.badlogic.gdx.Gdx.*;
+import com.mahdigmk.apaa.Model.User;
 
 public class SettingsMenu extends Menu {
-    public SettingsMenu(AAGame game) {
+    private final User user;
+
+    public SettingsMenu(AAGame game, User user) {
         super(game);
+        this.user = user;
     }
 }
