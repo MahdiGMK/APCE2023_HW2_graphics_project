@@ -19,24 +19,22 @@ public class LoginMenu extends Menu {
     CheckBox rememberLogin;
     TextButton registerButton, loginButton, guestButton;
     Label errorLabel;
-    Skin skin;
     private ControllerResponse response;
 
     public LoginMenu(AAGame game) {
         super(game);
 
-        skin = new Skin(files.internal("neon/skin/neon-ui.json"));
-        table = new Table(skin);
+        table = new Table(game.getSkin());
         table.setBounds(0, 0, graphics.getWidth(), graphics.getHeight());
 
-        username = new TextField("", skin, "login");
-        password = new TextField("", skin, "password");
+        username = new TextField("", game.getSkin(), "login");
+        password = new TextField("", game.getSkin(), "password");
         password.setPasswordMode(true);
         password.setPasswordCharacter('*');
-        rememberLogin = new CheckBox("remember login", skin);
-        registerButton = new TextButton("register", skin);
-        loginButton = new TextButton("login", skin);
-        guestButton = new TextButton("login as guest", skin);
+        rememberLogin = new CheckBox("remember login", game.getSkin());
+        registerButton = new TextButton("register", game.getSkin());
+        loginButton = new TextButton("login", game.getSkin());
+        guestButton = new TextButton("login as guest", game.getSkin());
 
         rememberLogin.setChecked(true);
         registerButton.addListener(new ClickListener() {
@@ -58,7 +56,7 @@ public class LoginMenu extends Menu {
             }
         });
 
-        errorLabel = new Label("", skin);
+        errorLabel = new Label("", game.getSkin());
         errorLabel.setColor(Color.RED);
 
 //        table.debug();
@@ -81,8 +79,9 @@ public class LoginMenu extends Menu {
     public void show() {
         super.show();
         User user = LoginMenuController.getRememberUser();
+        game.setUser(user);
         if (user != null)
-            setScreen(new MainMenu(game, user));
+            setScreen(new MainMenu(game));
     }
 
     private void loginGuest() {
@@ -91,9 +90,10 @@ public class LoginMenu extends Menu {
         if (response.getErrorCode() != 0) return;
 
         User user = User.getUser("_guest_");
+        game.setUser(user);
         if (rememberLogin.isChecked())
             LoginMenuController.rememberUser(user);
-        setScreen(new MainMenu(game, user));
+        setScreen(new MainMenu(game));
     }
 
     private void login() {
@@ -102,9 +102,10 @@ public class LoginMenu extends Menu {
         if (response.getErrorCode() != 0) return;
 
         User user = User.getUser(username.getText());
+        game.setUser(user);
         if (rememberLogin.isChecked())
             LoginMenuController.rememberUser(user);
-        setScreen(new MainMenu(game, user));
+        setScreen(new MainMenu(game));
     }
 
     private void register() {
@@ -113,15 +114,9 @@ public class LoginMenu extends Menu {
         if (response.getErrorCode() != 0) return;
 
         User user = User.getUser(username.getText());
+        game.setUser(user);
         if (rememberLogin.isChecked())
             LoginMenuController.rememberUser(user);
-        setScreen(new ProfileMenu(game, user));
-    }
-
-
-    @Override
-    public void dispose() {
-        super.dispose();
-        skin.dispose();
+        setScreen(new ProfileMenu(game));
     }
 }

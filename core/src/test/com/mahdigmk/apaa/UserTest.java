@@ -53,8 +53,14 @@ class UserTest {
     void cngUsername() {
         LoginMenuController.register("user", "user");
         User user = User.getUser("testUser");
-        response = ProfileMenuController.changeUsername(user, "user");
+        response = ProfileMenuController.changeUsername(user, " asdad");
         assertEquals(1, response.getErrorCode());
+        response = ProfileMenuController.changeUsername(user, "sa");
+        assertEquals(1, response.getErrorCode());
+        response = ProfileMenuController.changeUsername(user, "_guest_");
+        assertEquals(1, response.getErrorCode());
+        response = ProfileMenuController.changeUsername(user, "user");
+        assertEquals(2, response.getErrorCode());
         response = ProfileMenuController.changeUsername(user, "newUser");
         assertEquals(0, response.getErrorCode());
 
