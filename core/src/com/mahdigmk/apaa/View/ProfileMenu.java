@@ -236,11 +236,6 @@ public class ProfileMenu extends Menu {
         });
     }
 
-    @Override
-    public void render(float deltaTime) {
-        super.render(deltaTime);
-    }
-
     private void changeUsername() {
         response = ProfileMenuController.changeUsername(user, username.getText());
         updateMessage();
