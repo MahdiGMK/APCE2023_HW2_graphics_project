@@ -8,8 +8,8 @@ import static com.badlogic.gdx.Gdx.*;
 public class ScoreMenu extends Menu {
     private final User user;
 
-    public ScoreMenu(AAGame game, User user) {
+    public ScoreMenu(AAGame game) {
         super(game);
-        this.user = user;
+        user = game.getUser();
     }
 }

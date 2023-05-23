@@ -6,8 +6,8 @@ import com.mahdigmk.apaa.Model.User;
 public class SettingsMenu extends Menu {
     private final User user;
 
-    public SettingsMenu(AAGame game, User user) {
+    public SettingsMenu(AAGame game) {
         super(game);
-        this.user = user;
+        user = game.getUser();
     }
 }
