@@ -1,19 +1,22 @@
 package com.mahdigmk.apaa.View;
 
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mahdigmk.apaa.AAGame;
 
 import static com.badlogic.gdx.Gdx.*;
 
 public abstract class Menu implements Screen {
     protected final AAGame game;
-    protected final OrthographicCamera uiCamera;
+    protected final Stage uiStage;
 
     public Menu(AAGame game) {
         this.game = game;
-        uiCamera = new OrthographicCamera();
-        uiCamera.setToOrtho(false, graphics.getWidth(), graphics.getHeight());
+        uiStage = new Stage();
+        input.setInputProcessor(uiStage);
+        uiStage.setViewport(new FillViewport(graphics.getWidth(), graphics.getHeight()));
     }
 
     @Override
@@ -22,18 +25,17 @@ public abstract class Menu implements Screen {
 
     @Override
     public void render(float deltaTime) {
-
+        uiStage.act(deltaTime);
+        uiStage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
-        uiCamera.viewportWidth = graphics.getWidth();
-        uiCamera.viewportHeight = graphics.getHeight();
+        uiStage.getViewport().update(width, height, true);
     }
 
     @Override
     public void pause() {
-
     }
 
     @Override
@@ -43,11 +45,11 @@ public abstract class Menu implements Screen {
 
     @Override
     public void hide() {
-
+        dispose();
     }
 
     @Override
     public void dispose() {
-
+        uiStage.dispose();
     }
 }

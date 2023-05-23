@@ -29,15 +29,18 @@ public class AAGame extends Game {
         batch = new SpriteBatch();
         font = new BitmapFont();
         setScreen(new LoginMenu(this));
+        setScreen(new LoginMenu(this));
     }
 
     @Override
     public void render() {
+        ScreenUtils.clear(0.5f, 0.5f, 0.5f, 1);
         super.render();
     }
 
     @Override
     public void dispose() {
+        if (getScreen() != null) getScreen().dispose();
         batch.dispose();
         font.dispose();
     }
