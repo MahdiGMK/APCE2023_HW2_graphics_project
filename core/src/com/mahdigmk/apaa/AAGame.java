@@ -32,7 +32,7 @@ import java.io.FilenameFilter;
 public class AAGame extends Game {
     public static NativeFileChooser fileChooser;
     public static NativeFileChooserConfiguration fileChooserConfiguration;
-    public static Texture[] defaultPfp;
+    public static Texture[] defaultPfp = new Texture[4];
     public AssetManager assetManager = new AssetManager();
     private User user;
 

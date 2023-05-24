@@ -4,6 +4,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -23,20 +24,22 @@ public class ProfileMenu extends Menu {
     private User user;
     private Table mainTable, pfpTable;
     // Main Table
-    private Image pfp;
+    private ShadedImage pfp;
     private TextField username, password;
     private IconButton changePfpButton, changeUsernameButton, changePasswordButton;
     private TextButton mainMenuButton, logoutButton, removeAccountButton;
     private Label errorLabel;
     // pfp table
-    private Image pic[];
+    private ShadedImage pic[];
     private IconButton picButton[];
     private TextButton back, selectRandom, selectFile;
-
+    private ShaderProgram shader = null;
 
     public ProfileMenu(AAGame game) {
         super(game);
         this.user = game.getUser();
+        if (game.getSettings().isMonochromatic())
+            shader = GrayscaleShader.grayscaleShader;
 
         initMainTable();
         initPfpTable();
@@ -46,7 +49,8 @@ public class ProfileMenu extends Menu {
         mainTable = new Table();
         mainTable.setBounds(0, 0, graphics.getWidth(), graphics.getHeight());
 
-        pfp = new Image(ProfileMenuController.getPfpTexture(user));
+        pfp = new ShadedImage(ProfileMenuController.getPfpTexture(user), shader);
+
         username = new TextField(user.getUsername(), game.getSkin(), "login");
         password = new TextField(user.getPassword(), game.getSkin(), "password");
         Texture changeIcon = game.assetManager.get("icons/change.png");
@@ -135,11 +139,11 @@ public class ProfileMenu extends Menu {
         pfpTable = new Table();
         pfpTable.setBounds(0, 0, graphics.getWidth(), graphics.getHeight());
 
-        pic = new Image[AAGame.defaultPfp.length];
+        pic = new ShadedImage[AAGame.defaultPfp.length];
         picButton = new IconButton[AAGame.defaultPfp.length];
         Texture tickIcon = game.assetManager.get("icons/accept_tick.png", Texture.class);
         for (int i = 0; i < AAGame.defaultPfp.length; i++) {
-            pic[i] = new Image(AAGame.defaultPfp[i]);
+            pic[i] = new ShadedImage(AAGame.defaultPfp[i], shader);
             picButton[i] = new IconButton(tickIcon, 0.5f, game.getSkin());
             int finalI = i;
             picButton[i].addListener(new ClickListener() {
