@@ -10,13 +10,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class Settings {
-    public static final int MAX_BALL_COUNT = 10;
+    public static final int MIN_BALL_COUNT = 10, MAX_BALL_COUNT = 50;
     private DifficultyLevel difficultyLevel = DifficultyLevel.EASY;
-    private int ballCount = 5;
+    private Map map = Map.GRASS_LANDS;
+    private int ballCount = 20;
     private boolean muteMusic = false;
     private boolean monochromatic = false;
-    private Language language = Language.ENGLISH;
-    private int functionKey = Input.Keys.SPACE;
+    //    private Language language = Language.ENGLISH;
+    private int p1FunctionKey = Input.Keys.SPACE;
+    private int p2FunctionKey = Input.Keys.ENTER;
 
     public static Settings getSettings(User user) {
         File file = new File("Data/Users/" + user.getUsername() + "/settings.json");
@@ -31,6 +33,30 @@ public class Settings {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Map getMap() {
+        return map;
+    }
+
+    public void setMap(Map map) {
+        this.map = map;
+    }
+
+    public int getP1FunctionKey() {
+        return p1FunctionKey;
+    }
+
+    public void setP1FunctionKey(int p1FunctionKey) {
+        this.p1FunctionKey = p1FunctionKey;
+    }
+
+    public int getP2FunctionKey() {
+        return p2FunctionKey;
+    }
+
+    public void setP2FunctionKey(int p2FunctionKey) {
+        this.p2FunctionKey = p2FunctionKey;
     }
 
     public void save(User user) {
@@ -60,7 +86,7 @@ public class Settings {
     }
 
     public void setBallCount(int ballCount) {
-        this.ballCount = MathUtils.clamp(ballCount, 0, MAX_BALL_COUNT);
+        this.ballCount = MathUtils.clamp(ballCount, MIN_BALL_COUNT, MAX_BALL_COUNT);
     }
 
     public boolean isMuteMusic() {
@@ -77,21 +103,5 @@ public class Settings {
 
     public void setMonochromatic(boolean monochromatic) {
         this.monochromatic = monochromatic;
-    }
-
-    public Language isPersian() {
-        return language;
-    }
-
-    public void setLanguage(Language language) {
-        this.language = language;
-    }
-
-    public int getFunctionKey() {
-        return functionKey;
-    }
-
-    public void setFunctionKey(int functionKey) {
-        this.functionKey = functionKey;
     }
 }

@@ -34,7 +34,6 @@ public class AAGame extends Game {
     public static NativeFileChooserConfiguration fileChooserConfiguration;
     public static Texture[] defaultPfp;
     public AssetManager assetManager = new AssetManager();
-    private Skin skin;
     private User user;
 
     public User getUser() {
@@ -55,7 +54,6 @@ public class AAGame extends Game {
 
         fileChooserConfiguration.directory = Gdx.files.absolute(System.getProperty("user.home"));
 
-        skin = new Skin(files.internal("neon/skin/neon-ui.json"));
         user = User.getUser("user");
         setScreen(new LoginMenu(this));
     }
@@ -67,6 +65,9 @@ public class AAGame extends Game {
                 new Texture("defaultPfp/3.png"),
                 new Texture("defaultPfp/4.png")
         };
+
+        assetManager.load("neon/skin/default.json", Skin.class);
+        assetManager.load("neon/skin/monochrome.json", Skin.class);
 
         assetManager.load("icons/change.png", Texture.class);
         assetManager.load("icons/accept_tick.png", Texture.class);
@@ -83,17 +84,14 @@ public class AAGame extends Game {
     @Override
     public void dispose() {
         if (getScreen() != null) getScreen().dispose();
-        skin.dispose();
         for (Texture pfp : defaultPfp)
             pfp.dispose();
 
     }
 
     public Skin getSkin() {
-        return skin;
-    }
-
-    public void setSkin(Skin skin) {
-        this.skin = skin;
+        if (user != null && getSettings().isMonochromatic())
+            return assetManager.get("neon/skin/monochrome.json");
+        return assetManager.get("neon/skin/default.json");
     }
 }
