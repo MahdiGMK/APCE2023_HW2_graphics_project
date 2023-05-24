@@ -16,6 +16,7 @@ public class DesktopLauncher {
         config.setForegroundFPS(60);
         config.useVsync(true);
         config.setTitle("AP-AA");
+        config.setWindowedMode(640, 800);
         AAGame.fileChooser = new DesktopFileChooser();
         AAGame.fileChooserConfiguration = new NativeFileChooserConfiguration();
 

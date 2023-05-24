@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class User {
     private String username, password;
@@ -32,6 +33,20 @@ public class User {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static ArrayList<User> getAllUsers() {
+        ArrayList<User> users = new ArrayList<>();
+        File folder = new File("Data/Users");
+        for (File userFolder : folder.listFiles(File::isDirectory)) {
+            users.add(getUser(userFolder.getName()));
+        }
+        return users;
+    }
+
+    @Override
+    public String toString() {
+        return username;
     }
 
     public void save() {

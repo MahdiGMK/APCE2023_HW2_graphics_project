@@ -199,7 +199,7 @@
     }
     window-c: {
       name: window
-      color: color
+      color: { r: 1, g: 1, b: 1, a: 1 }
     }
     checkbox-pressed-over-c: {
       name: checkbox-pressed-over

@@ -2,6 +2,7 @@ package com.mahdigmk.apaa.View;
 
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mahdigmk.apaa.AAGame;
@@ -16,7 +17,8 @@ public abstract class Menu implements Screen {
         this.game = game;
         uiStage = new Stage();
         input.setInputProcessor(uiStage);
-        uiStage.setViewport(new FillViewport(graphics.getWidth(), graphics.getHeight()));
+//        uiStage.setViewport(new FillViewport(graphics.getWidth(), graphics.getHeight()));
+        uiStage.setViewport(new FitViewport(graphics.getWidth(), graphics.getHeight()));
     }
 
     protected Menu getScreen() {
