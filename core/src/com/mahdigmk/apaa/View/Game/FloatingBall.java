@@ -84,17 +84,21 @@ public class FloatingBall {
 
     public void draw(ShapeRenderer shapeRenderer) {
         shapeRenderer.setColor(Color.DARK_GRAY);
-        shapeRenderer.circle(position.x, position.y, gameData.getBallRadius() + GameMenu.outlineIncrement);
+        shapeRenderer.circle(position.x, position.y, getBallRadius() + GameMenu.outlineIncrement);
         shapeRenderer.setColor(getColor(playerId));
-        shapeRenderer.circle(position.x, position.y, gameData.getBallRadius());
+        shapeRenderer.circle(position.x, position.y, getBallRadius());
         shapeRenderer.end();
         batch.begin();
         font.setColor(Color.BLACK);
         Affine2 translation = new Affine2().translate(position.x, position.y).scale(new Vector2(2, 2));
         batch.setTransformMatrix(new Matrix4().setAsAffine(translation));// SOME MATRIX BS
-        font.draw(batch, "" + pBallIdx, -20, 5, 2 * gameData.getBallRadius(), Align.center, false);
+        font.draw(batch, "" + pBallIdx, -20, 5, 2 * getBallRadius(), Align.center, false);
         batch.end();
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+    }
+
+    private float getBallRadius() {
+        return GameMenu.singleton.getBallRadius();
     }
 
     public int getPlayerId() {

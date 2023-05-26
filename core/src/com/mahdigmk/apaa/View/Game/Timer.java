@@ -7,6 +7,10 @@ public class Timer {
         this.remaining = timer;
     }
 
+    public float getRemaining() {
+        return remaining;
+    }
+
     public void update(float deltaTime) {
         remaining -= deltaTime;
     }

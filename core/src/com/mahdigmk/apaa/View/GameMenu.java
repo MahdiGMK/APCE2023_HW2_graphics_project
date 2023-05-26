@@ -28,6 +28,7 @@ import java.util.Random;
 
 public class GameMenu extends Menu {
     public static float outlineIncrement;
+    public static GameMenu singleton;
     private final ShapeRenderer shapeRenderer;
     private final BitmapFont font;
     private final Batch batch;
@@ -37,14 +38,24 @@ public class GameMenu extends Menu {
     private final Viewport viewport;
     private final Random random;
     private final Timer reverseDirTimer = new Timer(4);
+    private final Timer shrinkBallTimer = new Timer(.5f);
+    private final Timer visInvisTimer = new Timer(1f);
+    private final boolean is2Player;
+    private final Timer randomShootDirTimer = new Timer(4);
     private float planetRotationSpeed;
     private Array<FloatingBall> floatingBalls;
     private double slowModeTime;
     private Slider slowModeSlider;
     private int ballCount = 0;
+    private boolean shrinkBall = false;
+    private boolean visInvis = false;
+    private float shootDir;
+    private float playerPosition;
 
-    public GameMenu(AAGame game, GameData gameData) {
+    public GameMenu(AAGame game, GameData gameData, boolean is2Player) {
         super(game);
+        this.is2Player = is2Player;
+        singleton = this;
 
         this.gameData = gameData;
         camera = new OrthographicCamera();
@@ -116,7 +127,13 @@ public class GameMenu extends Menu {
         }
 
         if (input.isKeyJustPressed(game.getSettings().getP1FunctionKey())) {
-            shootBall(0, 0, 0);
+            shootBall(0, playerPosition, shootDir);
+        }
+        if (input.isKeyJustPressed(game.getSettings().getP2FunctionKey())) {
+            if (is2Player)
+                shootBall(1, playerPosition, shootDir);
+            else
+                shootBall(0, playerPosition, shootDir);
         }
 
         slowModeTime = MathUtils.clamp(slowModeTime, 0, gameData.getDifficultyLevel().getFrozenDuration());
@@ -125,13 +142,39 @@ public class GameMenu extends Menu {
 
     private void handlePhaseSystem(int phaseIndex, float deltaTime) {
         boolean reverseDir = phaseIndex > 0;
-        boolean decSize = phaseIndex > 0;
+        boolean shrinkBall = phaseIndex > 0;
         boolean visInvis = phaseIndex > 1;
         boolean randomShootDir = phaseIndex > 2;
         boolean moveShooter = phaseIndex > 2;
 
         if (reverseDir) reverseDirSystem(deltaTime);
+        if (shrinkBall) shrinkBallSystem(deltaTime);
+        if (visInvis) visInvisSystem(deltaTime);
+        if (randomShootDir) randomShootDirSystem(deltaTime);
+        if (moveShooter) moveShooterSystem(deltaTime);
+    }
 
+    private void moveShooterSystem(float deltaTime) {
+        if (input.isKeyPressed(Input.Keys.LEFT)) playerPosition -= deltaTime;
+        if (input.isKeyPressed(Input.Keys.RIGHT)) playerPosition += deltaTime;
+        playerPosition = MathUtils.clamp(playerPosition, -1, 1);
+    }
+
+    private void randomShootDirSystem(float deltaTime) {
+        randomShootDirTimer.update(deltaTime);
+        if (randomShootDirTimer.act()) {
+            randomShootDirTimer.init(4);
+            shootDir = random.nextFloat(-0.5f, 0.5f);
+        }
+    }
+
+    private void visInvisSystem(float deltaTime) {
+        visInvisTimer.update(deltaTime);
+        if (visInvisTimer.act()) {
+            if (visInvis) visInvisTimer.init(3f);
+            else visInvisTimer.init(0.5f);
+            visInvis = !visInvis;
+        }
     }
 
     private void reverseDirSystem(float deltaTime) {
@@ -139,6 +182,14 @@ public class GameMenu extends Menu {
         if (reverseDirTimer.act()) {
             reverseDirTimer.init(random.nextFloat(1.5f, 6));
             planetRotationSpeed = -planetRotationSpeed;
+        }
+    }
+
+    private void shrinkBallSystem(float deltaTime) {
+        shrinkBallTimer.update(deltaTime);
+        if (shrinkBallTimer.act()) {
+            shrinkBallTimer.init(.5f);
+            shrinkBall = !shrinkBall;
         }
     }
 
@@ -191,22 +242,55 @@ public class GameMenu extends Menu {
             shapeRenderer.setColor(gameData.getMap().getDetailColor());
             shapeRenderer.circle(pos.x, pos.y, gameData.getPlanetRadius() * 0.03f);
         }
+        if (!visInvis) renderOnPlanetBalls();
 
+        renderPlayer(0, playerPosition, shootDir);
+        if (is2Player)
+            renderPlayer(1, playerPosition, shootDir);
+
+
+        for (FloatingBall ball : floatingBalls) {
+            ball.draw(shapeRenderer);
+        }
+
+        shapeRenderer.end();
+
+        drawUI();
+    }
+
+    private void renderPlayer(int playerId, float position, float direction) {
+        position *= gameData.getPlanetRadius();
+        float startY = -gameData.getPlanetRadius() * 2.5f;
+        Vector2 shootVel = getRotator(MathUtils.HALF_PI + direction)
+                .scl(gameData.getPlanetRadius() * 0.25f);
+        if (playerId == 1) {
+            startY = -startY;
+            shootVel.y = -shootVel.y;
+        }
+
+        shapeRenderer.setColor(Color.DARK_GRAY);
+        shapeRenderer.circle(position, startY, getBallRadius() + outlineIncrement);
+        shapeRenderer.rectLine(position, startY, position + shootVel.x, startY + shootVel.y, gameData.getBallRadius() * 0.2f);
+        shapeRenderer.setColor(gameData.getMap().getDetailColor());
+        shapeRenderer.circle(position, startY, getBallRadius());
+    }
+
+    private void renderOnPlanetBalls() {
         for (BallData ball : gameData.getBalls()) {
             Vector2 pos = getRotator((float) (ball.location() + gameData.getRotation()));
             pos.scl(gameData.getPlanetRadius());
 
 
             shapeRenderer.setColor(Color.DARK_GRAY);
-            shapeRenderer.rectLine(pos, new Vector2(pos).scl(1.2f), gameData.getBallRadius() * 0.25f + outlineIncrement * 2);
+            shapeRenderer.rectLine(pos, new Vector2(pos).scl(1.2f), getBallRadius() * 0.25f + outlineIncrement * 2);
             shapeRenderer.setColor(gameData.getMap().getDetailColor());
-            shapeRenderer.rectLine(pos, new Vector2(pos).scl(1.2f), gameData.getBallRadius() * 0.25f);
+            shapeRenderer.rectLine(pos, new Vector2(pos).scl(1.2f), getBallRadius() * 0.25f);
 
             pos.scl(1.2f);
             shapeRenderer.setColor(Color.DARK_GRAY);
-            shapeRenderer.circle(pos.x, pos.y, gameData.getBallRadius() + outlineIncrement);
+            shapeRenderer.circle(pos.x, pos.y, getBallRadius() + outlineIncrement);
             shapeRenderer.setColor(FloatingBall.getColor(ball.playerId()));
-            shapeRenderer.circle(pos.x, pos.y, gameData.getBallRadius());
+            shapeRenderer.circle(pos.x, pos.y, getBallRadius());
 
             if (ball.pBallIdx() >= 0) {
             }
@@ -223,23 +307,16 @@ public class GameMenu extends Menu {
             font.setColor(Color.BLACK);
             Affine2 translation = new Affine2().translate(pos.x, pos.y).scale(new Vector2(2, 2));
             batch.setTransformMatrix(new Matrix4().setAsAffine(translation));// SOME MATRIX BS
-            font.draw(batch, "" + ball.pBallIdx(), -20, 5, 2 * gameData.getBallRadius(), Align.center, false);
+            font.draw(batch, "" + ball.pBallIdx(), -20, 5, 2 * getBallRadius(), Align.center, false);
         }
         batch.end();
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+    }
 
-        shapeRenderer.setColor(Color.DARK_GRAY);
-        shapeRenderer.circle(0, -gameData.getPlanetRadius() * 2.5f, gameData.getBallRadius() + outlineIncrement);
-        shapeRenderer.setColor(gameData.getMap().getDetailColor());
-        shapeRenderer.circle(0, -gameData.getPlanetRadius() * 2.5f, gameData.getBallRadius());
-
-        for (FloatingBall ball : floatingBalls) {
-            ball.draw(shapeRenderer);
-        }
-
-        shapeRenderer.end();
-
-        drawUI();
+    public float getBallRadius() {
+        float res = gameData.getBallRadius();
+        if (shrinkBall) res *= 0.5f;
+        return res;
     }
 
     private void drawUI() {
