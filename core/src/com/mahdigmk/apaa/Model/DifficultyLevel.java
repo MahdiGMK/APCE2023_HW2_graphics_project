@@ -1,9 +1,9 @@
 package com.mahdigmk.apaa.Model;
 
 public enum DifficultyLevel {
-    EASY(5, 1.2, 7, 5),
-    MEDIUM(10, 1.5, 5, 3),
-    HARD(15, 1.8, 3, 1.5);
+    EASY(0.4, 0.2, 7, 5),
+    MEDIUM(0.8, 0.6, 5, 3),
+    HARD(1.4, 1.2, 3, 2);
     private final double rotationSpeed;
     private final double windSpeed;
     private final double frozenDuration;

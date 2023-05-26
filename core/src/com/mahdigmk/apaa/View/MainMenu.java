@@ -1,11 +1,12 @@
 package com.mahdigmk.apaa.View;
 
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.mahdigmk.apaa.AAGame;
+import com.mahdigmk.apaa.Model.Game.GameData;
 
 import static com.badlogic.gdx.Gdx.*;
 
@@ -99,7 +100,7 @@ public class MainMenu extends Menu {
     private void profileMenu() {
         setScreen(new ProfileMenu(game));
     }
-    
+
     private void startRace() {
 
     }
@@ -109,6 +110,10 @@ public class MainMenu extends Menu {
     }
 
     private void newGame() {
-
+        float ballRadius = 20;
+        int ballCount = game.getSettings().getBallCount() + game.getSettings().getMap().getInitialBallCount();
+        double planetRadius =
+                game.getSettings().getDifficultyLevel().getTotalSpaceRatio() * ballRadius * ballCount / MathUtils.PI; // R = d * num/pi
+        setScreen(new GameMenu(game, new GameData(game.getSettings().getDifficultyLevel(), game.getSettings().getMap(), (float) planetRadius, ballRadius)));
     }
 }
