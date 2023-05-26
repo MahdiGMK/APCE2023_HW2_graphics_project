@@ -30,6 +30,16 @@ public class ProfileMenuController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        src = new File("Data/GameSaves/" + user.getUsername() + ".json");
+        dst = new File("Data/GameSaves/" + newUsername + ".json");
+        if (src.exists()) {
+            try {
+                Files.move(src.toPath(), dst.toPath());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         user.setUsername(newUsername);
         user.save();
         return ControllerResponse.SUCCESS;

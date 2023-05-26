@@ -60,11 +60,11 @@ public class ScoreMenu extends Menu {
             table.row();
         }
         if (windows[0] != null)
-            windows[0].setColor(new Color(0xFFB500FF));
+            windows[0].setColor(transformColor(new Color(0xFFB500FF)));
         if (windows[1] != null)
-            windows[1].setColor(new Color(0x979797FF));
+            windows[1].setColor(transformColor(new Color(0x979797FF)));
         if (windows[2] != null)
-            windows[2].setColor(new Color(0xBC4A00FF));
+            windows[2].setColor(transformColor(new Color(0xBC4A00FF)));
 
         Window userWindow = new Window("", windowStyle);
         table.add(userWindow).width(graphics.getWidth());
@@ -88,6 +88,14 @@ public class ScoreMenu extends Menu {
         uiStage.addActor(mainMenuButton);
         uiStage.addActor(userWindow);
         uiStage.addActor(table);
+    }
+
+    public Color transformColor(Color in) {
+        if (game.getSettings().isMonochromatic()) {
+            float gray = (in.r + in.g + in.b) / 3;
+            return new Color(gray, gray, gray, in.a);
+        }
+        return in;
     }
 
     private void mainMenu() {

@@ -63,6 +63,7 @@ public class GameMenu extends Menu {
     private boolean gameWon;
     private boolean gameLost;
     private Color bkgColor = Color.GRAY;
+    private Label remainingBallLabel, scoreLabel, remainingTimeLabel;
 
 
     public GameMenu(AAGame game, GameData gameData) {
@@ -71,6 +72,15 @@ public class GameMenu extends Menu {
         stageTable = new Table();
         stageTable.setBounds(0, 0, graphics.getWidth(), graphics.getHeight());
         uiStage.addActor(stageTable);
+        remainingBallLabel = new Label("a", game.getSkin());
+        remainingBallLabel.setPosition(30, 5);
+        scoreLabel = new Label("a", game.getSkin());
+        scoreLabel.setPosition(30, 35);
+        remainingTimeLabel = new Label("a", game.getSkin());
+        remainingTimeLabel.setPosition(30, 65);
+        uiStage.addActor(remainingBallLabel);
+        uiStage.addActor(scoreLabel);
+        uiStage.addActor(remainingTimeLabel);
 
         ballCount = gameData.getBalls().size() - gameData.getMap().getInitialBallCount();
 
@@ -124,6 +134,15 @@ public class GameMenu extends Menu {
     @Override
     public void render(float deltaTime) {
         ScreenUtils.clear(transformColor(bkgColor));
+        remainingBallLabel.setColor(transformColor(lerp(Color.RED, Color.GREEN, 1.0f * ballCount / gameData.getBallCount())));
+        remainingBallLabel.setText("Remaining Balls : " + (gameData.getBallCount() - ballCount));
+        scoreLabel.setText("Current Winning Score : " + getScore(true));
+        float remTime = 120 - gameData.getPlayTime();
+        int mm = (int) remTime / 60, ss = ((int) remTime) % 60;
+        remainingTimeLabel.setText("Remaining Time : %02d:%02d".formatted(mm, ss));
+        if (remTime <= 0 && !gameWon && !gameLost)
+            endGame(false);
+
 
         if (!gameWon && !gameLost)
             if (input.isKeyJustPressed(Input.Keys.ESCAPE)) {
@@ -313,21 +332,11 @@ public class GameMenu extends Menu {
             table.add(new Label("You lost!", game.getSkin())).colspan(2);
         table.row();
         table.add(new Label("Score : ", game.getSkin()));
-        int score = (gameData.getBalls().size() - gameData.getMap().getInitialBallCount());
-        score *= 5;
-        if (win) score *= 2;
-        switch (gameData.getDifficultyLevel()) {
-            case MEDIUM -> score *= 1.5f;
-            case HARD -> score *= 2f;
-        }
-        switch (gameData.getMap()) {
-            case DRY_LANDS -> score *= 1.2f;
-            case FIRE_LANDS -> score *= 1.4f;
-        }
+        int score = getScore(win);
         table.add(new Label("" + score, game.getSkin()));
         table.row();
         table.add(new Label("Time spent : ", game.getSkin()));
-        int mm = (int) gameData.getPlayTime() / 60, ss = (int) gameData.getPlayTime();
+        int mm = (int) gameData.getPlayTime() / 60, ss = ((int) gameData.getPlayTime()) % 60;
         table.add(new Label(String.format("%02d:%02d", mm, ss), game.getSkin()));
         table.row();
         Button backButton = new TextButton("Back to main menu", game.getSkin());
@@ -352,6 +361,21 @@ public class GameMenu extends Menu {
         });
 
         stageTable.add(window);
+    }
+
+    private int getScore(boolean win) {
+        int score = (gameData.getBalls().size() - gameData.getMap().getInitialBallCount());
+        score *= 5;
+        if (win) score *= 2;
+        switch (gameData.getDifficultyLevel()) {
+            case MEDIUM -> score *= 1.5f;
+            case HARD -> score *= 2f;
+        }
+        switch (gameData.getMap()) {
+            case DRY_LANDS -> score *= 1.2f;
+            case FIRE_LANDS -> score *= 1.4f;
+        }
+        return score;
     }
 
     private void restart() {
@@ -384,7 +408,17 @@ public class GameMenu extends Menu {
         TextButton saveButton = new TextButton("Save", game.getSkin());
         TextButton backButton = new TextButton("Back to main menu", game.getSkin());
 
-        table.add(new Label("Pause menu", game.getSkin())).colspan(2);
+        table.add(new Label("Pause menu", game.getSkin())).colspan(2).spaceBottom(20);
+        table.row();
+        table.add(new Label("move left : LEFT Key", game.getSkin())).colspan(2);
+        table.row();
+        table.add(new Label("move right : RIGHT Key", game.getSkin())).colspan(2);
+        table.row();
+        table.add(new Label("frozen mode : TAB key", game.getSkin())).colspan(2);
+        table.row();
+        table.add(new Label("main shoot : " + Input.Keys.toString(game.getSettings().getP1FunctionKey()) + " key", game.getSkin())).colspan(2);
+        table.row();
+        table.add(new Label("alt shoot : " + Input.Keys.toString(game.getSettings().getP2FunctionKey()) + " key", game.getSkin())).colspan(2);
         table.row();
         table.add(playButton);
         table.add(musicSelectBox);
@@ -434,6 +468,10 @@ public class GameMenu extends Menu {
     }
 
     private void playMusic(TextButton button) {
+        if (game.getGameMusic().isPlaying())
+            button.setText("Play");
+        else
+            button.setText("Pause");
         game.pauseMusic(game.getGameMusic().isPlaying());
     }
 
