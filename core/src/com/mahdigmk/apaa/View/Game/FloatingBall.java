@@ -12,6 +12,9 @@ import com.mahdigmk.apaa.Model.Game.GameData;
 import com.mahdigmk.apaa.View.GameMenu;
 
 public class FloatingBall {
+    public static final Color defColor = new Color(0.9f, 0.4f, 0.1f, 1);
+    public static final Color p1Color = new Color(0.4f, 0.1f, 0.9f, 1);
+    public static final Color p2Color = new Color(0.4f, 0.9f, 0.1f, 1);
     private final GameData gameData;
     private final Batch batch;
     private final BitmapFont font;
@@ -29,6 +32,16 @@ public class FloatingBall {
         this.velocity = velocity;
         this.playerId = playerId;
         this.pBallIdx = pBallIdx;
+    }
+
+    public static Color getColor(int playerId) {
+        switch (playerId) {
+            case 0:
+                return p1Color;
+            case 1:
+                return p2Color;
+        }
+        return defColor;
     }
 
     public GameData getGameData() {
@@ -72,7 +85,7 @@ public class FloatingBall {
     public void draw(ShapeRenderer shapeRenderer) {
         shapeRenderer.setColor(Color.DARK_GRAY);
         shapeRenderer.circle(position.x, position.y, gameData.getBallRadius() + GameMenu.outlineIncrement);
-        shapeRenderer.setColor(gameData.getMap().getDetailColor());
+        shapeRenderer.setColor(getColor(playerId));
         shapeRenderer.circle(position.x, position.y, gameData.getBallRadius());
         shapeRenderer.end();
         batch.begin();

@@ -37,6 +37,7 @@ public class GameMenu extends Menu {
     private Array<FloatingBall> floatingBalls;
     private double slowModeTime;
     private Slider slowModeSlider;
+    private int ballCount = 0;
 
     public GameMenu(AAGame game, GameData gameData) {
         super(game);
@@ -99,12 +100,7 @@ public class GameMenu extends Menu {
         }
 
         if (input.isKeyJustPressed(game.getSettings().getP1FunctionKey())) {
-            floatingBalls.add(new FloatingBall(
-                    gameData,
-                    batch, font, new Vector2(0, -gameData.getPlanetRadius() * 2.5f),
-                    new Vector2(0, gameData.getPlanetRadius() * 1.75f),
-                    0, 0
-            ));
+            shootBall(0, 0, 0);
         }
 
         slowModeTime = MathUtils.clamp(slowModeTime, 0, gameData.getDifficultyLevel().getFrozenDuration());
@@ -115,8 +111,26 @@ public class GameMenu extends Menu {
         draw();
     }
 
-    private void lose(int playerId) {
+    private void shootBall(int playerId, float position, float direction) {
+        position *= gameData.getPlanetRadius();
+        float startY = -gameData.getPlanetRadius() * 2.5f;
+        Vector2 shootVel = getRotator(MathUtils.HALF_PI + direction)
+                .scl(gameData.getPlanetRadius() * 1.75f);
+        if (playerId == 1) {
+            startY = -startY;
+            shootVel.y = -shootVel.y;
+        }
 
+        floatingBalls.add(new FloatingBall(
+                gameData,
+                batch, font, new Vector2(position, startY),
+                shootVel,
+                playerId, game.getSettings().getBallCount() - ballCount++
+        ));
+    }
+
+    private void lose(int playerId) {
+        ///TODO
     }
 
     private void draw() {
@@ -160,20 +174,28 @@ public class GameMenu extends Menu {
             pos.scl(1.2f);
             shapeRenderer.setColor(Color.DARK_GRAY);
             shapeRenderer.circle(pos.x, pos.y, gameData.getBallRadius() + outlineIncrement);
-            shapeRenderer.setColor(gameData.getMap().getDetailColor());
+            shapeRenderer.setColor(FloatingBall.getColor(ball.playerId()));
             shapeRenderer.circle(pos.x, pos.y, gameData.getBallRadius());
 
             if (ball.pBallIdx() >= 0) {
-                shapeRenderer.end();
-                batch.begin();
-                font.setColor(Color.BLACK);
-                Affine2 translation = new Affine2().translate(pos.x, pos.y).scale(new Vector2(2, 2));
-                batch.setTransformMatrix(new Matrix4().setAsAffine(translation));// SOME MATRIX BS
-                font.draw(batch, "" + ball.pBallIdx(), -20, 5, 2 * gameData.getBallRadius(), Align.center, false);
-                batch.end();
-                shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             }
         }
+        shapeRenderer.end();
+        batch.begin();
+        for (BallData ball : gameData.getBalls()) {
+            if (ball.pBallIdx() == -1) continue;
+
+            Vector2 pos = getRotator((float) (ball.location() + gameData.getRotation()));
+            pos.scl(gameData.getPlanetRadius());
+            pos.scl(1.2f);
+
+            font.setColor(Color.BLACK);
+            Affine2 translation = new Affine2().translate(pos.x, pos.y).scale(new Vector2(2, 2));
+            batch.setTransformMatrix(new Matrix4().setAsAffine(translation));// SOME MATRIX BS
+            font.draw(batch, "" + ball.pBallIdx(), -20, 5, 2 * gameData.getBallRadius(), Align.center, false);
+        }
+        batch.end();
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         shapeRenderer.setColor(Color.DARK_GRAY);
         shapeRenderer.circle(0, -gameData.getPlanetRadius() * 2.5f, gameData.getBallRadius() + outlineIncrement);
