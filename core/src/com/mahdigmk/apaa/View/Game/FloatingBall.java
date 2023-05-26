@@ -1,21 +1,30 @@
 package com.mahdigmk.apaa.View.Game;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Affine2;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 import com.mahdigmk.apaa.Model.Game.GameData;
 import com.mahdigmk.apaa.View.GameMenu;
 
 public class FloatingBall {
     private final GameData gameData;
+    private final Batch batch;
+    private final BitmapFont font;
     private int pBallIdx;
     private int playerId;
     private Vector2 position;
     private Vector2 velocity;
     private boolean alive = true;
 
-    public FloatingBall(GameData gameData, Vector2 position, Vector2 velocity, int playerId, int pBallIdx) {
+    public FloatingBall(GameData gameData, Batch batch, BitmapFont font, Vector2 position, Vector2 velocity, int playerId, int pBallIdx) {
         this.gameData = gameData;
+        this.batch = batch;
+        this.font = font;
         this.position = position;
         this.velocity = velocity;
         this.playerId = playerId;
@@ -65,6 +74,14 @@ public class FloatingBall {
         shapeRenderer.circle(position.x, position.y, gameData.getBallRadius() + GameMenu.outlineIncrement);
         shapeRenderer.setColor(gameData.getMap().getDetailColor());
         shapeRenderer.circle(position.x, position.y, gameData.getBallRadius());
+        shapeRenderer.end();
+        batch.begin();
+        font.setColor(Color.BLACK);
+        Affine2 translation = new Affine2().translate(position.x, position.y).scale(new Vector2(2, 2));
+        batch.setTransformMatrix(new Matrix4().setAsAffine(translation));// SOME MATRIX BS
+        font.draw(batch, "" + pBallIdx, -20, 5, 2 * gameData.getBallRadius(), Align.center, false);
+        batch.end();
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
     }
 
     public int getPlayerId() {

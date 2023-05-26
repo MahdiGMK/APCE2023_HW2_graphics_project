@@ -3,11 +3,16 @@ package com.mahdigmk.apaa.View;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -23,6 +28,8 @@ import java.util.Random;
 public class GameMenu extends Menu {
     public static float outlineIncrement;
     private final ShapeRenderer shapeRenderer;
+    private final BitmapFont font;
+    private final Batch batch;
     private final GameData gameData;
     private final Array<Vector2> details;
     private final OrthographicCamera camera;
@@ -37,6 +44,7 @@ public class GameMenu extends Menu {
         this.gameData = gameData;
         camera = new OrthographicCamera();
         shapeRenderer = new ShapeRenderer();
+        font = new BitmapFont();
         details = new Array<>();
         viewport = new FitViewport(graphics.getWidth(), graphics.getHeight(), camera);
         camera.zoom = gameData.getPlanetRadius() / 150f;
@@ -53,6 +61,7 @@ public class GameMenu extends Menu {
         slowModeSlider.setDisabled(true);
         uiStage.addActor(slowModeSlider);
         slowModeTime = gameData.getDifficultyLevel().getFrozenDuration();
+        batch = new SpriteBatch();
     }
 
     @Override
@@ -92,7 +101,7 @@ public class GameMenu extends Menu {
         if (input.isKeyJustPressed(game.getSettings().getP1FunctionKey())) {
             floatingBalls.add(new FloatingBall(
                     gameData,
-                    new Vector2(0, -gameData.getPlanetRadius() * 2.5f),
+                    batch, font, new Vector2(0, -gameData.getPlanetRadius() * 2.5f),
                     new Vector2(0, gameData.getPlanetRadius() * 1.75f),
                     0, 0
             ));
@@ -114,6 +123,8 @@ public class GameMenu extends Menu {
         outlineIncrement = gameData.getPlanetRadius() * 0.015f;
 
         shapeRenderer.setProjectionMatrix(camera.combined);
+        batch.setProjectionMatrix(camera.combined);
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         shapeRenderer.setColor(Color.DARK_GRAY);
@@ -151,6 +162,17 @@ public class GameMenu extends Menu {
             shapeRenderer.circle(pos.x, pos.y, gameData.getBallRadius() + outlineIncrement);
             shapeRenderer.setColor(gameData.getMap().getDetailColor());
             shapeRenderer.circle(pos.x, pos.y, gameData.getBallRadius());
+
+            if (ball.pBallIdx() >= 0) {
+                shapeRenderer.end();
+                batch.begin();
+                font.setColor(Color.BLACK);
+                Affine2 translation = new Affine2().translate(pos.x, pos.y).scale(new Vector2(2, 2));
+                batch.setTransformMatrix(new Matrix4().setAsAffine(translation));// SOME MATRIX BS
+                font.draw(batch, "" + ball.pBallIdx(), -20, 5, 2 * gameData.getBallRadius(), Align.center, false);
+                batch.end();
+                shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            }
         }
 
         shapeRenderer.setColor(Color.DARK_GRAY);
@@ -182,5 +204,7 @@ public class GameMenu extends Menu {
     public void dispose() {
         super.dispose();
         shapeRenderer.dispose();
+        font.dispose();
+        batch.dispose();
     }
 }
