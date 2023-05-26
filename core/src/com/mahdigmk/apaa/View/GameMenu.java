@@ -20,6 +20,7 @@ import com.mahdigmk.apaa.AAGame;
 import com.mahdigmk.apaa.Model.Game.BallData;
 import com.mahdigmk.apaa.Model.Game.GameData;
 import com.mahdigmk.apaa.View.Game.FloatingBall;
+import com.mahdigmk.apaa.View.Game.Timer;
 
 import static com.badlogic.gdx.Gdx.*;
 
@@ -34,6 +35,9 @@ public class GameMenu extends Menu {
     private final Array<Vector2> details;
     private final OrthographicCamera camera;
     private final Viewport viewport;
+    private final Random random;
+    private final Timer reverseDirTimer = new Timer(4);
+    private float planetRotationSpeed;
     private Array<FloatingBall> floatingBalls;
     private double slowModeTime;
     private Slider slowModeSlider;
@@ -51,7 +55,7 @@ public class GameMenu extends Menu {
         camera.zoom = gameData.getPlanetRadius() / 150f;
         floatingBalls = new Array<>();
 
-        Random random = new Random();
+        random = new Random();
         int detailCount = random.nextInt(15) + 15;
         for (int i = 0; i < detailCount; i++) {
             details.add(new Vector2(random.nextFloat(16 * MathUtils.PI),
@@ -63,6 +67,7 @@ public class GameMenu extends Menu {
         uiStage.addActor(slowModeSlider);
         slowModeTime = gameData.getDifficultyLevel().getFrozenDuration();
         batch = new SpriteBatch();
+        planetRotationSpeed = (float) gameData.getDifficultyLevel().getRotationSpeed();
     }
 
     @Override
@@ -75,8 +80,19 @@ public class GameMenu extends Menu {
     public void render(float deltaTime) {
         super.render(deltaTime);
 
+        update(deltaTime);
+
+        uiStage.act(deltaTime);
+
+        draw();
+    }
+
+    private void update(float deltaTime) {
+        int phaseIndex = ballCount * 4 / gameData.getBallCount();
+        handlePhaseSystem(phaseIndex, deltaTime);
+
         boolean slowMode = input.isKeyPressed(Input.Keys.TAB) && slowModeTime > 0;
-        double rotationSpeed = gameData.getDifficultyLevel().getRotationSpeed();
+        float rotationSpeed = planetRotationSpeed;
         if (slowMode) {
             slowModeTime -= deltaTime;
             rotationSpeed *= .5f;
@@ -105,10 +121,25 @@ public class GameMenu extends Menu {
 
         slowModeTime = MathUtils.clamp(slowModeTime, 0, gameData.getDifficultyLevel().getFrozenDuration());
         slowModeSlider.setValue((float) slowModeTime);
+    }
 
-        uiStage.act(deltaTime);
+    private void handlePhaseSystem(int phaseIndex, float deltaTime) {
+        boolean reverseDir = phaseIndex > 0;
+        boolean decSize = phaseIndex > 0;
+        boolean visInvis = phaseIndex > 1;
+        boolean randomShootDir = phaseIndex > 2;
+        boolean moveShooter = phaseIndex > 2;
 
-        draw();
+        if (reverseDir) reverseDirSystem(deltaTime);
+
+    }
+
+    private void reverseDirSystem(float deltaTime) {
+        reverseDirTimer.update(deltaTime);
+        if (reverseDirTimer.act()) {
+            reverseDirTimer.init(random.nextFloat(1.5f, 6));
+            planetRotationSpeed = -planetRotationSpeed;
+        }
     }
 
     private void shootBall(int playerId, float position, float direction) {

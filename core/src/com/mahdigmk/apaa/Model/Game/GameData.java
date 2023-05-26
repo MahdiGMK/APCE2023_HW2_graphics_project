@@ -11,22 +11,25 @@ import java.util.ArrayList;
 public class GameData {
     private final DifficultyLevel difficultyLevel;
     private final Map map;
+    private final int ballCount;
     private final float planetRadius, ballRadius;
     private final ArrayList<BallData> balls;
     private double rotation;
 
-    public GameData(DifficultyLevel difficultyLevel, Map map, float range, float ballRadius, double rotation, ArrayList<BallData> balls) {
+    public GameData(DifficultyLevel difficultyLevel, Map map, int ballCount, float range, float ballRadius, double rotation, ArrayList<BallData> balls) {
         this.difficultyLevel = difficultyLevel;
         this.map = map;
+        this.ballCount = ballCount;
         this.planetRadius = range;
         this.ballRadius = ballRadius;
         this.rotation = rotation;
         this.balls = new ArrayList<>(balls);
     }
 
-    public GameData(DifficultyLevel difficultyLevel, Map map, float radius, float ballRadius) {
+    public GameData(DifficultyLevel difficultyLevel, Map map, int ballCount, float radius, float ballRadius) {
         this.difficultyLevel = difficultyLevel;
         this.map = map;
+        this.ballCount = ballCount;
         this.planetRadius = radius;
         this.ballRadius = ballRadius;
         rotation = 0;
@@ -49,6 +52,10 @@ public class GameData {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public int getBallCount() {
+        return ballCount;
     }
 
     public DifficultyLevel getDifficultyLevel() {
@@ -98,8 +105,11 @@ public class GameData {
         for (BallData ball : balls) {
             double loc2 = ball.location();
             double delta = (loc2 - loc) % circle;
+            delta = (delta + circle) % circle;
             delta = Math.min(delta, circle - delta);
-            if (delta * planetRadius < ballRadius * 2) return false;
+
+            if (delta * planetRadius < ballRadius * 2)
+                return false;
         }
         return true;
     }

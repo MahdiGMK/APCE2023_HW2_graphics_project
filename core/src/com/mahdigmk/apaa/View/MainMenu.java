@@ -114,6 +114,6 @@ public class MainMenu extends Menu {
         int ballCount = game.getSettings().getBallCount() + game.getSettings().getMap().getInitialBallCount();
         double planetRadius =
                 game.getSettings().getDifficultyLevel().getTotalSpaceRatio() * ballRadius * ballCount / MathUtils.PI; // R = d * num/pi
-        setScreen(new GameMenu(game, new GameData(game.getSettings().getDifficultyLevel(), game.getSettings().getMap(), (float) planetRadius, ballRadius)));
+        setScreen(new GameMenu(game, new GameData(game.getSettings().getDifficultyLevel(), game.getSettings().getMap(), game.getSettings().getBallCount(), (float) planetRadius, ballRadius)));
     }
 }

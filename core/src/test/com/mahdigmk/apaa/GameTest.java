@@ -14,7 +14,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 public class GameTest {
     @Test
     void testGameSave() {
-        GameData gameData = new GameData(DifficultyLevel.EASY, Map.GRASS_LANDS, 300, 10);
+        GameData gameData = new GameData(DifficultyLevel.EASY, Map.GRASS_LANDS, 10, 300, 10);
         gameData.save();
 
         GameData loaded = GameData.load();
