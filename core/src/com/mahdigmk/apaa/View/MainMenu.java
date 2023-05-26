@@ -12,7 +12,7 @@ import static com.badlogic.gdx.Gdx.*;
 
 public class MainMenu extends Menu {
     private Table table;
-    private TextButton newGameButton, continueGameButton, startRaceButton, profileMenuButton, scoreMenuButton, settingsMenuButton, exitGameButton;
+    private TextButton newGameButton, continueGameButton, startCoopButton, profileMenuButton, scoreMenuButton, settingsMenuButton, exitGameButton;
 
     public MainMenu(AAGame game) {
         super(game);
@@ -20,7 +20,7 @@ public class MainMenu extends Menu {
         table.setBounds(0, 0, graphics.getWidth(), graphics.getHeight());
         newGameButton = new TextButton("new game", game.getSkin());
         continueGameButton = new TextButton("continue game", game.getSkin());
-        startRaceButton = new TextButton("start race", game.getSkin());
+        startCoopButton = new TextButton("start Co-op", game.getSkin());
         profileMenuButton = new TextButton("profile menu", game.getSkin());
         scoreMenuButton = new TextButton("score menu", game.getSkin());
         settingsMenuButton = new TextButton("settings menu", game.getSkin());
@@ -38,10 +38,10 @@ public class MainMenu extends Menu {
                 continueGame();
             }
         });
-        startRaceButton.addListener(new ClickListener() {
+        startCoopButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                startRace();
+                startCoop();
             }
         });
         profileMenuButton.addListener(new ClickListener() {
@@ -73,7 +73,7 @@ public class MainMenu extends Menu {
         table.add(newGameButton).width(150);
         table.add(continueGameButton).width(150);
         table.row();
-        table.add(startRaceButton).colspan(2).width(150);
+        table.add(startCoopButton).colspan(2).width(150);
         table.row();
         table.add(scoreMenuButton).colspan(2).width(150).spaceBottom(20);
         table.row();
@@ -101,12 +101,32 @@ public class MainMenu extends Menu {
         setScreen(new ProfileMenu(game));
     }
 
-    private void startRace() {
+    private void startCoop() {
+        float ballRadius = 20;
+        int ballCount = game.getSettings().getBallCount() + game.getSettings().getMap().getInitialBallCount();
+        double planetRadius =
+                game.getSettings().getDifficultyLevel().getTotalSpaceRatio() * ballRadius * ballCount / MathUtils.PI; // R = d * num/pi
+        setScreen(
+                new GameMenu(
+                        game,
+                        new GameData(
+                                game.getSettings().getDifficultyLevel(),
+                                game.getSettings().getMap(),
+                                game.getSettings().getBallCount(),
+                                (float) planetRadius, ballRadius,
+                                true
+                        ))
+        );
 
     }
 
     private void continueGame() {
-
+        GameData data = GameData.load(game.getUser());
+        if (data == null) {
+            newGame();
+            return;
+        }
+        setScreen(new GameMenu(game, data));
     }
 
     private void newGame() {
@@ -121,10 +141,9 @@ public class MainMenu extends Menu {
                                 game.getSettings().getDifficultyLevel(),
                                 game.getSettings().getMap(),
                                 game.getSettings().getBallCount(),
-                                (float) planetRadius, ballRadius
-                        ),
-                        false
-                )
+                                (float) planetRadius, ballRadius,
+                                false
+                        ))
         );
     }
 }

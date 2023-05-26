@@ -3,6 +3,7 @@ package com.mahdigmk.apaa.Model;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.MathUtils;
 import com.google.gson.Gson;
+import com.mahdigmk.apaa.View.Game.GameMusic;
 
 import java.io.File;
 import java.io.FileReader;
@@ -19,6 +20,7 @@ public class Settings {
     //    private Language language = Language.ENGLISH;
     private int p1FunctionKey = Input.Keys.SPACE;
     private int p2FunctionKey = Input.Keys.ENTER;
+    private GameMusic selectedMusic = GameMusic.DARWINIA_01;
 
     public static Settings getSettings(User user) {
         File file = new File("Data/Users/" + user.getUsername() + "/settings.json");
@@ -103,5 +105,13 @@ public class Settings {
 
     public void setMonochromatic(boolean monochromatic) {
         this.monochromatic = monochromatic;
+    }
+
+    public GameMusic getSelectedMusic() {
+        return selectedMusic;
+    }
+
+    public void setSelectedMusic(GameMusic selectedMusic) {
+        this.selectedMusic = selectedMusic;
     }
 }

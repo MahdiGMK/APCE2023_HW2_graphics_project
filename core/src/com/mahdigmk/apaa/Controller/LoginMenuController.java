@@ -20,6 +20,7 @@ public class LoginMenuController {
         user = new User(username, password, random.nextInt(AAGame.defaultPfp.length));
         Settings userSettings = new Settings();
         user.save();
+        userSettings.setSelectedMusic(AAGame.singleton.getSelectedMusic());
         userSettings.save(user);
         return ControllerResponse.SUCCESS;
     }
@@ -28,6 +29,8 @@ public class LoginMenuController {
         User user = User.getUser(username);
         if (user == null) return new ControllerResponse(1, "Username doesnt exist");
         if (!user.getPassword().equals(password)) return new ControllerResponse(2, "Wrong Password");
+        Settings settings = Settings.getSettings(user);
+        AAGame.singleton.setSelectedMusic(settings.getSelectedMusic(), false);
         return ControllerResponse.SUCCESS;
     }
 

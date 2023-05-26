@@ -13,6 +13,7 @@ import com.mahdigmk.apaa.Model.DifficultyLevel;
 import com.mahdigmk.apaa.Model.Map;
 import com.mahdigmk.apaa.Model.Settings;
 import com.mahdigmk.apaa.Model.User;
+import com.mahdigmk.apaa.View.Game.GameMusic;
 
 import static com.badlogic.gdx.Gdx.*;
 
@@ -26,6 +27,7 @@ public class SettingsMenu extends Menu {
     private int p1FunctionKey, p2FunctionKey;
     private SelectBox<DifficultyLevel> difficultyLevelSelectBox;
     private SelectBox<Map> mapSelectBox;
+    private SelectBox<GameMusic> musicSelectBox;
     private Slider ballCountSlider;
     private CheckBox muteButton, monochromaticButton;
     private TextButton selectP1Button, selectP2Button, applyButton, mainMenuButton;
@@ -60,6 +62,9 @@ public class SettingsMenu extends Menu {
 
         muteButton = new CheckBox("mute", game.getSkin());
         muteButton.setChecked(settings.isMuteMusic());
+        musicSelectBox = new SelectBox<GameMusic>(game.getSkin());
+        musicSelectBox.setItems(GameMusic.DARWINIA_01, GameMusic.DARWINIA_02, GameMusic.DARWINIA_03);
+        musicSelectBox.setSelected(game.getSelectedMusic());
 
         monochromaticButton = new CheckBox("monochromatic", game.getSkin());
         monochromaticButton.setChecked(settings.isMonochromatic());
@@ -97,6 +102,13 @@ public class SettingsMenu extends Menu {
                 mainMenu();
             }
         });
+        musicSelectBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent changeEvent, Actor actor) {
+                game.setSelectedMusic(musicSelectBox.getSelected(), true);
+                settings.setSelectedMusic(musicSelectBox.getSelected());
+            }
+        });
 
 
         table.add(difficultyLevelLabel);
@@ -108,7 +120,8 @@ public class SettingsMenu extends Menu {
         table.add(ballCountLabel);
         table.add(ballCountSlider);
         table.row();
-        table.add(muteButton).colspan(2);
+        table.add(musicSelectBox);
+        table.add(muteButton);
         table.row();
         table.add(monochromaticButton).colspan(2);
         table.row();

@@ -37,11 +37,11 @@ public class FloatingBall {
     public static Color getColor(int playerId) {
         switch (playerId) {
             case 0:
-                return p1Color;
+                return GameMenu.singleton.transformColor(p1Color);
             case 1:
-                return p2Color;
+                return GameMenu.singleton.transformColor(p2Color);
         }
-        return defColor;
+        return GameMenu.singleton.transformColor(defColor);
     }
 
     public GameData getGameData() {

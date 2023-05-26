@@ -15,9 +15,11 @@ public class GameData {
     private final int ballCount;
     private final float planetRadius, ballRadius;
     private final ArrayList<BallData> balls;
+    private final boolean is2Player;
     private double rotation;
+    private float playTime;
 
-    public GameData(DifficultyLevel difficultyLevel, Map map, int ballCount, float range, float ballRadius, double rotation, ArrayList<BallData> balls) {
+    public GameData(DifficultyLevel difficultyLevel, Map map, int ballCount, float range, float ballRadius, double rotation, ArrayList<BallData> balls, boolean is2Player) {
         this.difficultyLevel = difficultyLevel;
         this.map = map;
         this.ballCount = ballCount;
@@ -25,14 +27,16 @@ public class GameData {
         this.ballRadius = ballRadius;
         this.rotation = rotation;
         this.balls = new ArrayList<>(balls);
+        this.is2Player = is2Player;
     }
 
-    public GameData(DifficultyLevel difficultyLevel, Map map, int ballCount, float radius, float ballRadius) {
+    public GameData(DifficultyLevel difficultyLevel, Map map, int ballCount, float radius, float ballRadius, boolean is2Player) {
         this.difficultyLevel = difficultyLevel;
         this.map = map;
         this.ballCount = ballCount;
         this.planetRadius = radius;
         this.ballRadius = ballRadius;
+        this.is2Player = is2Player;
         rotation = 0;
         balls = new ArrayList<>();
         float slice = 2 * MathUtils.PI / map.getInitialBallCount();
@@ -54,6 +58,23 @@ public class GameData {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void delete(User user) {
+        File file = new File("Data/GameSaves/" + user.getUsername() + ".json");
+        file.delete();
+    }
+
+    public float getPlayTime() {
+        return playTime;
+    }
+
+    public void setPlayTime(float playTime) {
+        this.playTime = playTime;
+    }
+
+    public boolean isIs2Player() {
+        return is2Player;
     }
 
     public int getBallCount() {

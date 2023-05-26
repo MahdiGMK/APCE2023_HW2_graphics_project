@@ -1,7 +1,6 @@
 package com.mahdigmk.apaa.View;
 
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -48,7 +47,6 @@ public class GameMenu extends Menu {
     private final Timer reverseDirTimer = new Timer(4);
     private final Timer shrinkBallTimer = new Timer(.5f);
     private final Timer visInvisTimer = new Timer(1f);
-    private final boolean is2Player;
     private final Timer randomShootDirTimer = new Timer(4);
     private final Table stageTable;
     private float endGameTime;
@@ -62,21 +60,19 @@ public class GameMenu extends Menu {
     private float shootDir;
     private float playerPosition;
     private boolean isPaused;
-    private float playTime;
     private boolean gameWon;
     private boolean gameLost;
     private Color bkgColor = Color.GRAY;
 
-    private Music gameMusic;
-    private GameMusic selectedMusic;
 
-    public GameMenu(AAGame game, GameData gameData, boolean is2Player) {
+    public GameMenu(AAGame game, GameData gameData) {
         super(game);
-        this.is2Player = is2Player;
         singleton = this;
         stageTable = new Table();
         stageTable.setBounds(0, 0, graphics.getWidth(), graphics.getHeight());
         uiStage.addActor(stageTable);
+
+        ballCount = gameData.getBalls().size() - gameData.getMap().getInitialBallCount();
 
         this.gameData = gameData;
         camera = new OrthographicCamera();
@@ -101,10 +97,6 @@ public class GameMenu extends Menu {
         batch = new SpriteBatch();
         planetRotationSpeed = (float) gameData.getDifficultyLevel().getRotationSpeed();
 
-        selectedMusic = GameMusic.DARWINIA_01;
-        gameMusic = selectedMusic.getMusic();
-        gameMusic.setLooping(true);
-        gameMusic.play();
     }
 
     private static Color lerp(Color a, Color b, float t) {
@@ -121,12 +113,17 @@ public class GameMenu extends Menu {
         viewport.update(width, height);
     }
 
+    public Color transformColor(Color in) {
+        if (game.getSettings().isMonochromatic()) {
+            float gray = (in.r + in.g + in.b) / 3;
+            return new Color(gray, gray, gray, in.a);
+        }
+        return in;
+    }
+
     @Override
     public void render(float deltaTime) {
-        ScreenUtils.clear(bkgColor);
-
-        if (game.getSettings().isMuteMusic()) gameMusic.setVolume(0);
-        else gameMusic.setVolume(1);
+        ScreenUtils.clear(transformColor(bkgColor));
 
         if (!gameWon && !gameLost)
             if (input.isKeyJustPressed(Input.Keys.ESCAPE)) {
@@ -164,7 +161,7 @@ public class GameMenu extends Menu {
     private void update(float deltaTime) {
         if (ballCount - floatingBalls.size == gameData.getBallCount()) endGame(true);
 
-        playTime += deltaTime;
+        gameData.setPlayTime(gameData.getPlayTime() + deltaTime);
         int phaseIndex = ballCount * 4 / gameData.getBallCount();
         handlePhaseSystem(phaseIndex, deltaTime);
 
@@ -218,7 +215,7 @@ public class GameMenu extends Menu {
             shootBall(0, playerPosition, shootDir);
         }
         if (input.isKeyJustPressed(game.getSettings().getP2FunctionKey())) {
-            if (is2Player)
+            if (gameData.isIs2Player())
                 shootBall(1, playerPosition, shootDir);
             else
                 shootBall(0, playerPosition, shootDir);
@@ -301,6 +298,8 @@ public class GameMenu extends Menu {
     }
 
     private void endGame(boolean win) {
+        GameData.delete(game.getUser());
+
         floatingBalls.clear();
 
         if (win) gameWon = true;
@@ -328,7 +327,7 @@ public class GameMenu extends Menu {
         table.add(new Label("" + score, game.getSkin()));
         table.row();
         table.add(new Label("Time spent : ", game.getSkin()));
-        int mm = (int) playTime / 60, ss = (int) playTime;
+        int mm = (int) gameData.getPlayTime() / 60, ss = (int) gameData.getPlayTime();
         table.add(new Label(String.format("%02d:%02d", mm, ss), game.getSkin()));
         table.row();
         Button backButton = new TextButton("Back to main menu", game.getSkin());
@@ -359,7 +358,7 @@ public class GameMenu extends Menu {
         GameMenu menu = new GameMenu(game, new GameData(
                 gameData.getDifficultyLevel()
                 , gameData.getMap(), gameData.getBallCount(),
-                gameData.getPlanetRadius(), gameData.getBallRadius()), is2Player);
+                gameData.getPlanetRadius(), gameData.getBallRadius(), gameData.isIs2Player()));
 
         setScreen(menu);
     }
@@ -374,13 +373,13 @@ public class GameMenu extends Menu {
         Window window = new Window("", game.getSkin());
         Table table = new Table();
         TextButton playButton;
-        if (gameMusic.isPlaying())
+        if (game.getGameMusic().isPlaying())
             playButton = new TextButton("Pause", game.getSkin());
         else
             playButton = new TextButton("Play", game.getSkin());
         SelectBox<GameMusic> musicSelectBox = new SelectBox<GameMusic>(game.getSkin());
         musicSelectBox.setItems(GameMusic.DARWINIA_01, GameMusic.DARWINIA_02, GameMusic.DARWINIA_03);
-        musicSelectBox.setSelected(selectedMusic);
+        musicSelectBox.setSelected(game.getSelectedMusic());
         TextButton restartButton = new TextButton("Restart", game.getSkin());
         TextButton saveButton = new TextButton("Save", game.getSkin());
         TextButton backButton = new TextButton("Back to main menu", game.getSkin());
@@ -431,21 +430,11 @@ public class GameMenu extends Menu {
     }
 
     private void changeMusic(SelectBox<GameMusic> musicSelectBox) {
-        selectedMusic = musicSelectBox.getSelected();
-        boolean playing = gameMusic.isPlaying();
-        gameMusic.stop();
-        gameMusic = selectedMusic.getMusic();
-        if (playing) gameMusic.play();
+        game.setSelectedMusic(musicSelectBox.getSelected(), true);
     }
 
     private void playMusic(TextButton button) {
-        if (gameMusic.isPlaying()) {
-            gameMusic.pause();
-            button.setText("Play");
-        } else {
-            gameMusic.play();
-            button.setText("Pause");
-        }
+        game.pauseMusic(game.getGameMusic().isPlaying());
     }
 
     private void save() {
@@ -468,12 +457,12 @@ public class GameMenu extends Menu {
 
         shapeRenderer.setColor(Color.DARK_GRAY);
         shapeRenderer.circle(0, 0, gameData.getPlanetRadius() + outlineIncrement);
-        shapeRenderer.setColor(gameData.getMap().getOuterColor());
+        shapeRenderer.setColor(getOuterColor());
         shapeRenderer.circle(0, 0, gameData.getPlanetRadius());
 
         shapeRenderer.setColor(Color.DARK_GRAY);
         shapeRenderer.circle(0, 0, gameData.getPlanetRadius() * 0.8f + outlineIncrement);
-        shapeRenderer.setColor(gameData.getMap().getInnerColor());
+        shapeRenderer.setColor(getInnerColor());
         shapeRenderer.circle(0, 0, gameData.getPlanetRadius() * 0.8f);
 
         for (Vector2 detail : details) {
@@ -482,13 +471,13 @@ public class GameMenu extends Menu {
 
             shapeRenderer.setColor(Color.DARK_GRAY);
             shapeRenderer.circle(pos.x, pos.y, gameData.getPlanetRadius() * 0.03f + outlineIncrement);
-            shapeRenderer.setColor(gameData.getMap().getDetailColor());
+            shapeRenderer.setColor(getDetailColor());
             shapeRenderer.circle(pos.x, pos.y, gameData.getPlanetRadius() * 0.03f);
         }
         if (!visInvis) renderOnPlanetBalls();
 
         renderPlayer(0, playerPosition, shootDir);
-        if (is2Player)
+        if (gameData.isIs2Player())
             renderPlayer(1, playerPosition, shootDir);
 
 
@@ -499,6 +488,18 @@ public class GameMenu extends Menu {
         shapeRenderer.end();
 
         drawUI();
+    }
+
+    private Color getDetailColor() {
+        return transformColor(gameData.getMap().getDetailColor());
+    }
+
+    private Color getInnerColor() {
+        return transformColor(gameData.getMap().getInnerColor());
+    }
+
+    private Color getOuterColor() {
+        return transformColor(gameData.getMap().getOuterColor());
     }
 
     private void renderPlayer(int playerId, float position, float direction) {
@@ -517,7 +518,7 @@ public class GameMenu extends Menu {
         shapeRenderer.setColor(Color.DARK_GRAY);
         shapeRenderer.circle(position, startY, getBallRadius() + outlineIncrement);
         shapeRenderer.rectLine(position, startY, position + shootVel.x, startY + shootVel.y, gameData.getBallRadius() * 0.2f);
-        shapeRenderer.setColor(gameData.getMap().getDetailColor());
+        shapeRenderer.setColor(getDetailColor());
         shapeRenderer.circle(position, startY, getBallRadius());
     }
 
@@ -530,7 +531,7 @@ public class GameMenu extends Menu {
 
             shapeRenderer.setColor(Color.DARK_GRAY);
             shapeRenderer.rectLine(pos, new Vector2(pos).scl(dst), getBallRadius() * 0.25f + outlineIncrement * 2);
-            shapeRenderer.setColor(gameData.getMap().getDetailColor());
+            shapeRenderer.setColor(getDetailColor());
             shapeRenderer.rectLine(pos, new Vector2(pos).scl(dst), getBallRadius() * 0.25f);
 
             pos.scl(dst);

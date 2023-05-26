@@ -2,6 +2,7 @@ package com.mahdigmk.apaa.Controller;
 
 import com.badlogic.gdx.Input;
 import com.mahdigmk.apaa.Model.*;
+import com.mahdigmk.apaa.View.Game.GameMusic;
 
 public class SettingsMenuController {
     public static ControllerResponse changeDifficultyLevel(User user, Settings settings, DifficultyLevel newValue) {
@@ -34,6 +35,12 @@ public class SettingsMenuController {
 
     public static ControllerResponse changeMonochromatic(User user, Settings settings, boolean newValue) {
         settings.setMonochromatic(newValue);
+        settings.save(user);
+        return ControllerResponse.SUCCESS;
+    }
+
+    public static ControllerResponse changeSelectedMusic(User user, Settings settings, GameMusic newValue) {
+        settings.setSelectedMusic(newValue);
         settings.save(user);
         return ControllerResponse.SUCCESS;
     }
