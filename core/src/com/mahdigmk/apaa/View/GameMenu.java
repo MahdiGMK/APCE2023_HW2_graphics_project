@@ -12,8 +12,10 @@ import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
@@ -66,6 +68,7 @@ public class GameMenu extends Menu {
     private Color bkgColor = Color.GRAY;
 
     private Music gameMusic;
+    private GameMusic selectedMusic;
 
     public GameMenu(AAGame game, GameData gameData, boolean is2Player) {
         super(game);
@@ -98,7 +101,8 @@ public class GameMenu extends Menu {
         batch = new SpriteBatch();
         planetRotationSpeed = (float) gameData.getDifficultyLevel().getRotationSpeed();
 
-        gameMusic = GameMusic._1.newMusic();
+        selectedMusic = GameMusic.DARWINIA_01;
+        gameMusic = selectedMusic.getMusic();
         gameMusic.setLooping(true);
         gameMusic.play();
     }
@@ -167,12 +171,22 @@ public class GameMenu extends Menu {
         boolean slowMode = input.isKeyPressed(Input.Keys.TAB) && slowModeTime > 0;
         float rotationSpeed = planetRotationSpeed;
         if (slowMode) {
+            float effect = 0.5f;
             slowModeTime -= deltaTime;
-            rotationSpeed *= .5f;
+            rotationSpeed *= effect;
 
             bkgColor = lerp(bkgColor, Color.CYAN, deltaTime * 5);
+            reverseDirTimer.setSpeed(effect);
+            visInvisTimer.setSpeed(effect);
+            shrinkBallTimer.setSpeed(effect);
+            randomShootDirTimer.setSpeed(effect);
         } else {
             bkgColor = lerp(bkgColor, Color.GRAY, deltaTime * 5);
+            float effect = 1;
+            reverseDirTimer.setSpeed(effect);
+            visInvisTimer.setSpeed(effect);
+            shrinkBallTimer.setSpeed(effect);
+            randomShootDirTimer.setSpeed(effect);
         }
 
         gameData.setRotation(gameData.getRotation() + deltaTime * rotationSpeed);
@@ -318,6 +332,9 @@ public class GameMenu extends Menu {
         table.add(new Label(String.format("%02d:%02d", mm, ss), game.getSkin()));
         table.row();
         Button backButton = new TextButton("Back to main menu", game.getSkin());
+        Button restartButton = new TextButton("Restart", game.getSkin());
+        table.add(restartButton).colspan(2);
+        table.row();
         table.add(backButton).colspan(2);
         window.add(table);
 
@@ -328,8 +345,23 @@ public class GameMenu extends Menu {
                 mainMenu();
             }
         });
+        restartButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                restart();
+            }
+        });
 
         stageTable.add(window);
+    }
+
+    private void restart() {
+        GameMenu menu = new GameMenu(game, new GameData(
+                gameData.getDifficultyLevel()
+                , gameData.getMap(), gameData.getBallCount(),
+                gameData.getPlanetRadius(), gameData.getBallRadius()), is2Player);
+
+        setScreen(menu);
     }
 
     private void mainMenu() {
@@ -341,24 +373,83 @@ public class GameMenu extends Menu {
         isPaused = true;
         Window window = new Window("", game.getSkin());
         Table table = new Table();
-        Button restartButton = new TextButton("Restart", game.getSkin());
-        Button saveButton = new TextButton("Save", game.getSkin());
-        Button backButton = new TextButton("Back to main menu", game.getSkin());
+        TextButton playButton;
+        if (gameMusic.isPlaying())
+            playButton = new TextButton("Pause", game.getSkin());
+        else
+            playButton = new TextButton("Play", game.getSkin());
+        SelectBox<GameMusic> musicSelectBox = new SelectBox<GameMusic>(game.getSkin());
+        musicSelectBox.setItems(GameMusic.DARWINIA_01, GameMusic.DARWINIA_02, GameMusic.DARWINIA_03);
+        musicSelectBox.setSelected(selectedMusic);
+        TextButton restartButton = new TextButton("Restart", game.getSkin());
+        TextButton saveButton = new TextButton("Save", game.getSkin());
+        TextButton backButton = new TextButton("Back to main menu", game.getSkin());
 
         table.add(new Label("Pause menu", game.getSkin())).colspan(2);
         table.row();
-
+        table.add(playButton);
+        table.add(musicSelectBox);
+        table.row();
+        table.add(saveButton).width(100);
+        table.add(restartButton).width(100);
+        table.row();
         table.add(backButton).colspan(2);
         window.add(table);
 
+        saveButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                save();
+            }
+        });
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 mainMenu();
             }
         });
+        restartButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                restart();
+            }
+        });
+        playButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                playMusic(playButton);
+            }
+        });
+        musicSelectBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent changeEvent, Actor actor) {
+                changeMusic(musicSelectBox);
+            }
+        });
 
         stageTable.add(window);
+    }
+
+    private void changeMusic(SelectBox<GameMusic> musicSelectBox) {
+        selectedMusic = musicSelectBox.getSelected();
+        boolean playing = gameMusic.isPlaying();
+        gameMusic.stop();
+        gameMusic = selectedMusic.getMusic();
+        if (playing) gameMusic.play();
+    }
+
+    private void playMusic(TextButton button) {
+        if (gameMusic.isPlaying()) {
+            gameMusic.pause();
+            button.setText("Play");
+        } else {
+            gameMusic.play();
+            button.setText("Pause");
+        }
+    }
+
+    private void save() {
+        gameData.save(game.getUser());
     }
 
     @Override
@@ -492,6 +583,5 @@ public class GameMenu extends Menu {
         shapeRenderer.dispose();
         font.dispose();
         batch.dispose();
-        gameMusic.dispose();
     }
 }

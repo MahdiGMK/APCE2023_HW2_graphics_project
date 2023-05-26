@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.google.gson.Gson;
 import com.mahdigmk.apaa.Model.DifficultyLevel;
 import com.mahdigmk.apaa.Model.Map;
+import com.mahdigmk.apaa.Model.User;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -38,8 +39,9 @@ public class GameData {
         for (int i = 0; i < map.getInitialBallCount(); i++) balls.add(new BallData(slice * i, -1, -1));
     }
 
-    public static GameData load() {
-        File file = new File("Data/gamesave.json");
+    public static GameData load(User user) {
+        File file = new File("Data/GameSaves/" + user.getUsername() + ".json");
+
         if (!file.exists())
             return null;
 
@@ -86,8 +88,8 @@ public class GameData {
         return balls;
     }
 
-    public void save() {
-        File file = new File("Data/gamesave.json");
+    public void save(User user) {
+        File file = new File("Data/GameSaves/" + user.getUsername() + ".json");
         file.getParentFile().mkdirs();
         try {
             FileWriter writer = new FileWriter(file);
