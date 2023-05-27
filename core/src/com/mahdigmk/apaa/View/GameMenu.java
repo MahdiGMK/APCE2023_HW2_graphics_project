@@ -1,6 +1,7 @@
 package com.mahdigmk.apaa.View;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -36,6 +37,7 @@ import java.util.Random;
 public class GameMenu extends Menu {
     public static float outlineIncrement;
     public static GameMenu singleton;
+    private static Sound soundEffect;
     private final ShapeRenderer shapeRenderer;
     private final BitmapFont font;
     private final Batch batch;
@@ -68,6 +70,8 @@ public class GameMenu extends Menu {
 
     public GameMenu(AAGame game, GameData gameData) {
         super(game);
+        if (soundEffect == null)
+            soundEffect = audio.newSound(files.internal("sound/shoot.ogg"));
         singleton = this;
         stageTable = new Table();
         stageTable.setBounds(0, 0, graphics.getWidth(), graphics.getHeight());
@@ -308,6 +312,7 @@ public class GameMenu extends Menu {
             shootVel.y = -shootVel.y;
         }
 
+        soundEffect.play();
         floatingBalls.add(new FloatingBall(
                 gameData,
                 batch, font, new Vector2(position, startY),
