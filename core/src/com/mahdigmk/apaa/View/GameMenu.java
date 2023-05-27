@@ -341,9 +341,12 @@ public class GameMenu extends Menu {
         table.row();
         Button backButton = new TextButton("Back to main menu", game.getSkin());
         Button restartButton = new TextButton("Restart", game.getSkin());
+        Button scoreButton = new TextButton("Score menu", game.getSkin());
         table.add(restartButton).colspan(2);
         table.row();
         table.add(backButton).colspan(2);
+        table.row();
+        table.add(scoreButton).colspan(2);
         window.add(table);
 
         ScoreMenuController.changeScore(game.getUser(), game.getUser().getScore() + score);
@@ -357,6 +360,12 @@ public class GameMenu extends Menu {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 restart();
+            }
+        });
+        scoreButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                setScreen(new ScoreMenu(game));
             }
         });
 
@@ -555,7 +564,7 @@ public class GameMenu extends Menu {
 
         shapeRenderer.setColor(Color.DARK_GRAY);
         shapeRenderer.circle(position, startY, getBallRadius() + outlineIncrement);
-        shapeRenderer.rectLine(position, startY, position + shootVel.x, startY + shootVel.y, gameData.getBallRadius() * 0.2f);
+        shapeRenderer.rectLine(position, startY, position + shootVel.x, startY + shootVel.y, gameData.getBallRadius() * 0.65f);
         shapeRenderer.setColor(getDetailColor());
         shapeRenderer.circle(position, startY, getBallRadius());
     }
